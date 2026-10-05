@@ -15,10 +15,12 @@ base/animation.ipynb
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
+base/.ipynb_checkpoints/
 **/.ipynb_checkpoints/
 
 # Python cache
 __pycache__/
+base/__pycache__/
 **/__pycache__/
 *.pyc
 
