@@ -1,7 +1,24 @@
+# R folder
 R/
 
+# Output files
 outputs/
+
+# Old/model notebooks
 Modelo 09-26.ipynb
 Modelo 09-30.ipynb
 Modelo 10-02.ipynb
 Modelo.ipynb
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Windows files
+desktop.ini
+**/desktop.ini
