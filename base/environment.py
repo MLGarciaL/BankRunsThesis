@@ -10,7 +10,7 @@ class Environment:
                  N, Lambda, 
                  threshold = None,
                  liquidity_ratio=0.2, liquidation_discount=0.9, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0, 
-                 network_type="random", p=0.2, number_of_clusters=2, p_inside=0.7, p_outside=0.01, 
+                 network_type="random", p=0.2, number_of_clusters=2, p_inside=0.7, p_outside=0.01, mean_degree = 4, edges = 1, 
                  seed=None):
 
         # características ambiente
@@ -29,7 +29,7 @@ class Environment:
         self.bank = Bank(liquidity_ratio, liquidation_discount, return_multiplier, theta, R, r, equity)
 
         # Create network
-        self.network = Network(self, network_type, p, number_of_clusters, p_inside, p_outside, seed)
+        self.network = Network(self, network_type, p, number_of_clusters, p_inside, p_outside, mean_degree, edges, seed)
 
 
         # estadísticas

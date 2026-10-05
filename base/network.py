@@ -8,7 +8,13 @@ import random
 
 
 class Network:
-    def __init__(self, environment, network_type="random", p=0.2, number_of_clusters=2, p_inside=0.7, p_outside=0.1, seed=None):
+    def __init__(self, environment, network_type="random", 
+                 p=0.2,  # random and Watts-Strogatz 
+                 number_of_clusters=2, 
+                 p_inside=0.7, p_outside=0.1, # Clustered
+                 mean_degree = 4, # Watts-Strogatz
+                 edges = 1, # Barabasi-Albert
+                 seed=None):
 
         self.agents = environment.agents
         self.N = environment.N
@@ -32,7 +38,18 @@ class Network:
             self.p_inside = p_inside
             self.p_outside = p_outside
             self.G = self._clustered_network()
-            
+
+        elif (self.network_type == 'Watts-Strogatz') or (self.network_type == 'WS'):
+            self.network_type = 'Watts-Strogatz'
+            self.p = p
+            self.mean_degree_par = mean_degree
+            self.G = nx.watts_strogatz_graph(self.N, mean_degree, p, seed=seed)
+
+        elif (self.network_type == 'Barabasi-Albert') or (self.network_type == 'BA'):
+            self.network_type = 'Barabasi-Albert'
+            self.p = p
+            self.edges_par = edges
+            self.G = nx.barabasi_albert_graph(self.N, edges, seed=seed)
 
         else: # elif: network_type == "random":
             self.network_type = 'random'
@@ -133,6 +150,10 @@ class Network:
             ax.text(0, 1, rf"Model Parameters: $N = {self.N}$, $\lambda = {self.Lambda}$, {self.network_type.capitalize()} Network ($C = $ {self.number_of_clusters}, $p_i =$ {self.p_inside}, $p_o =$ {self.p_outside})",transform=ax.transAxes, fontsize=15, ha="left", va="bottom", color="#555555")
         elif self.network_type == 'grid':
             ax.text(0, 1, rf"Model Parameters: $N = {self.N}$, $\lambda = {self.Lambda}$, {self.network_type.capitalize()} Network ({int(self.N**0.5)}x{int(self.N**0.5)})",transform=ax.transAxes, fontsize=15, ha="left", va="bottom", color="#555555")
+        elif self.network_type == 'Watts-Strogatz':
+            ax.text(0, 1, rf"Model Parameters: $N = {self.N}$, $\lambda = {self.Lambda}$, {self.network_type.capitalize()} Network ($p = $ {self.p}, $k = $ {self.mean_degree_par})",transform=ax.transAxes, fontsize=15, ha="left", va="bottom", color="#555555")
+        elif self.network_type == 'Barabasi-Albert':
+            ax.text(0, 1, rf"Model Parameters: $N = {self.N}$, $\lambda = {self.Lambda}$, {self.network_type.capitalize()} Network ($m = $ {self.edges_par})",transform=ax.transAxes, fontsize=15, ha="left", va="bottom", color="#555555")
         else:
             ax.text(0, 1, rf"Model Parameters: $N = {self.N}$, $\lambda = {self.Lambda}$, {self.network_type.capitalize()} Network ($p = $ {self.p})",transform=ax.transAxes, fontsize=15, ha="left", va="bottom", color="#555555")
             
