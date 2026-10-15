@@ -174,3 +174,19 @@ class Network:
 
     def density(self):
         return nx.density(self.G)
+
+    def average_path_length(self):
+        if nx.is_connected(self.G):
+            return nx.average_shortest_path_length(self.G)
+        else:
+            # Extract the largest connected component (following Wolitzky's standard convention)
+            largest_cc = max(nx.connected_components(self.G), key=len)
+            subgraph = self.G.subgraph(largest_cc)
+            return nx.average_shortest_path_length(subgraph)
+    
+    def average_clustering(self):
+        return nx.average_clustering(self.G)
+
+    def detect_clusters(self):
+        from networkx.algorithms.community import greedy_modularity_communities
+        return list(greedy_modularity_communities(self.G))
