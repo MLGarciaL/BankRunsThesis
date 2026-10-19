@@ -73,6 +73,8 @@ class Bank:
         if total_remaining_claims == 0:
             return
         
+        self.Rtilde = min(self.liquid_reserves/ total_remaining_claims, self.R)     
+           
         # Pagar depositantes o pro-ratear si no alcanza
         
         if self.liquid_reserves >= total_remaining_claims * self.R:
@@ -91,6 +93,6 @@ class Bank:
                 self.liquid_reserves -= L * share
                 
                 self.depositors[agent_id] = 0.0
-        
+
         self.liquid_reserves = 0.0 if abs(self.liquid_reserves) < 1e-10 else self.liquid_reserves
         return

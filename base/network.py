@@ -187,6 +187,9 @@ class Network:
     def average_clustering(self):
         return nx.average_clustering(self.G)
 
+    def clustering(self):
+        return nx.clustering(self.G)
+
     def detect_clusters(self):
         from networkx.algorithms.community import greedy_modularity_communities
         return list(greedy_modularity_communities(self.G))

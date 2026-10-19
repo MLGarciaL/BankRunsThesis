@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import networkx as nx
 from .agent import Agent
 from .bank import Bank
 from .network import Network
@@ -8,7 +9,7 @@ from .network import Network
 class Environment:
     def __init__(self, 
                  N, Lambda, 
-                 threshold = None,
+                 threshold = None, varepsilon = 0,
                  liquidity_ratio=0.2, liquidation_discount=0.9, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0, 
                  network_type="random", p=0.2, number_of_clusters=2, p_inside=0.7, p_outside=0.01, mean_degree = 4, edges = 1, 
                  seed=None):
@@ -23,7 +24,7 @@ class Environment:
             np.random.seed(seed)
             
         impatient_indices = set(random.sample(range(N), round(Lambda * N)))
-        self.agents = [Agent(initial_cash=1.0, is_patient=(i not in impatient_indices), threshold=threshold) for i in range(N)]
+        self.agents = [Agent(initial_cash=1.0, is_patient=(i not in impatient_indices), threshold=threshold, signal=theta + random.uniform(-varepsilon, varepsilon)) for i in range(N)]
 
         # Create bank
         self.bank = Bank(liquidity_ratio, liquidation_discount, return_multiplier, theta, R, r, equity)
@@ -31,12 +32,27 @@ class Environment:
         # Create network
         self.network = Network(self, network_type, p, number_of_clusters, p_inside, p_outside, mean_degree, edges, seed)
 
+        # Learning process
+        self.w = np.array([agent.cash for agent in self.agents])
+        self.b = np.array([agent.signal for agent in self.agents]) 
+        W = nx.adjacency_matrix(self.network.G).toarray() + np.eye(self.N)  # Add self-loops
+        W = W * self.w
+        W /= W.sum(axis=1, keepdims=True) 
+        self.W = W
 
         # estadísticas
         self.withdrawn_order = []
         self.withdrawn_ammount = []
         self.bank_failure = False
+        self.solventNS = True
         self.run_percentage = 0
+
+    def learn_signals(self, K):
+        for _ in range(K):
+            self.b = self.W @ self.b  
+        
+        for agent, new_signal in zip(self.agents, self.b):
+            agent.signal = new_signal
 
 
     def simulation(self, random_order = True, printing = True):
@@ -113,7 +129,8 @@ class Environment:
 
         if not self.bank.is_solvent:
             self.bank_failure = True
-        
+
+        self.T = random_order
         self.run_percentage = sum(agent.has_withdrawn for agent in self.agents)/len(self.agents)
             
         
@@ -126,9 +143,12 @@ class Environment:
         
         self.bank.settle_maturity()
 
+        if self.bank.Rtilde<self.bank.r:
+            self.solventNS = True
+
         if printing:
             print("--- Maturity settlement ---")
-            print(f"Liquid: {round(self.bank.liquid_reserves, 2)} | " f"Illiquid: {round(self.bank.illiquid_assets, 2)} | " f"Solvent: {self.bank.is_solvent}")
+            print(f"Liquid: {round(self.bank.liquid_reserves, 2)} | " f"Illiquid: {round(self.bank.illiquid_assets, 2)} | " f"Solvent: {self.bank.is_solvent} | " f"Solvent (NS): {self.solventNS}") #Non Strict Solvency
         
         # ============================================================
         # Payoffs
@@ -143,3 +163,18 @@ class Environment:
 
     def graph(self):
         self.network.graph()
+
+    def get_results(self):
+        return {
+        'N': self.N,
+        'lambda': self.Lambda,
+        'Mean_Degree': self.network.mean_degree(),
+        'Density': self.network.density(),
+        'Average_Path_Length': self.network.average_path_length(),
+        'Average_Clustering': self.network.average_clustering(),
+        'bank_failure': self.bank_failure,
+        'solventNS': self.solventNS,
+        'run_percentage': self.run_percentage,
+        'T': self.T,
+        'withdrawn_ammount': self.withdrawn_ammount,
+        }

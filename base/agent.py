@@ -1,16 +1,16 @@
 import random
+import numpy as np
 
 class Agent:
-    def __init__(self, initial_cash=1.0, is_patient=True, threshold=None):
+    def __init__(self, initial_cash=1.0, is_patient=True, threshold=None, signal = None):
 
         # caracteristicas
         self.cash = initial_cash
         self.deposited_money = 0.0
-        self.bank = None                  # Banco asignado explícitamente
-        self.is_patient = is_patient      # Tipo de preferencia de consumo
-        self.signal = None                # Señal privada s_i
-        self.threshold = threshold        # Threshold de accionar.
-        self.network = {}
+        self.bank = None                                  # Banco asignado explícitamente
+        self.is_patient = is_patient                      # Tipo de preferencia de consumo
+        self.signal = np.clip(signal, -1, 1)              # Señal privada s_i
+        self.threshold = threshold                        # Threshold de accionar, en lugar del microfundamentado.
         self.act = False
         
         self.random_value = random.random()
