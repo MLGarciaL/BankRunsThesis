@@ -9,6 +9,7 @@ class Bank:
         self.ell = liquidation_discount   # Descuento por venta forzosa (l)
         self.return_multiplier = return_multiplier
         self.theta = theta
+        self.Rtilde = 0
         self.R = R
         self.r = r
 

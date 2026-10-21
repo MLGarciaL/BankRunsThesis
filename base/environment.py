@@ -129,8 +129,9 @@ class Environment:
 
         if not self.bank.is_solvent:
             self.bank_failure = True
+            self.solventNS = False
 
-        self.T = random_order
+        self.T = round_number
         self.run_percentage = sum(agent.has_withdrawn for agent in self.agents)/len(self.agents)
             
         
@@ -144,7 +145,7 @@ class Environment:
         self.bank.settle_maturity()
 
         if self.bank.Rtilde<self.bank.r:
-            self.solventNS = True
+            self.solventNS = False
 
         if printing:
             print("--- Maturity settlement ---")
@@ -168,6 +169,7 @@ class Environment:
         return {
         'N': self.N,
         'lambda': self.Lambda,
+        'Network_type': self.network.network_type,
         'Mean_Degree': self.network.mean_degree(),
         'Density': self.network.density(),
         'Average_Path_Length': self.network.average_path_length(),
