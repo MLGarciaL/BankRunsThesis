@@ -1,5 +1,5 @@
 class Bank:
-    def __init__(self, liquidity_ratio=0.2, liquidation_discount=0.9, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0):
+    def __init__(self, liquidity_ratio=0.2, liquidation_discount=0.9, base_return = 1, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0):
 
         # caracteristicas
         self.total_deposits = 0.0
@@ -7,7 +7,8 @@ class Bank:
         self.liquid_reserves = 0.0        # L_t
         self.illiquid_assets = equity     # I_t
         self.ell = liquidation_discount   # Descuento por venta forzosa (l)
-        self.return_multiplier = return_multiplier
+        self.base_return = base_return    # A
+        self.return_multiplier = return_multiplier # B
         self.theta = theta
         self.Rtilde = 0
         self.R = R
@@ -66,7 +67,7 @@ class Bank:
             return 
 
         # Retorno Bruto del banco.
-        Y_theta = 1.0 + self.return_multiplier * self.theta
+        Y_theta = self.base_return + self.return_multiplier * self.theta
         self.liquid_reserves += self.illiquid_assets * Y_theta
         self.illiquid_assets = 0
 

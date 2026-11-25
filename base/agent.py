@@ -9,7 +9,7 @@ class Agent:
         self.deposited_money = 0.0
         self.bank = None                                  # Banco asignado explícitamente
         self.is_patient = is_patient                      # Tipo de preferencia de consumo
-        self.signal = np.clip(signal, -1, 1)              # Señal privada s_i
+        self.signal = np.clip(signal, 0, 1)               # Señal privada s_i
         self.threshold = threshold                        # Threshold de accionar, en lugar del microfundamentado.
         self.act = False
         
@@ -55,24 +55,19 @@ class Agent:
         return should_withdraw
 
     def evaluation(self):
+        v = (sum(neighbor.has_withdrawn*neighbor.cash/self.bank.r for neighbor in self.neighbors))/self.d_0
+
         if not self.threshold:
-            # if len(self.neighbors) == 0:
-            #     v = self.random_value
-            # else:
-            #     v = (sum(neighbor.has_withdrawn*neighbor.cash/self.bank.r for neighbor in self.neighbors))/self.d_0
-
-            v = (sum(neighbor.has_withdrawn*neighbor.cash/self.bank.r for neighbor in self.neighbors))/self.d_0
-
             if v == 1:
                 self.act = True
                 return
 
-            E_Y = 1 + self.bank.return_multiplier*self.signal
+            E_Y = self.bank.base_return + self.bank.return_multiplier*self.signal
             E_p = (E_Y*(self.bank.i_0 - max(v*self.bank.r - self.bank.alpha,0)/self.bank.ell) + max(self.bank.alpha - v*self.bank.r,0))/(1-v)
 
             if E_p< self.bank.r:
                 self.act = True
 
         else:
-            if sum(neighbor.has_withdrawn for neighbor in self.neighbors) > self.threshold * len(self.neighbors):
+            if v > self.threshold:
                 self.act = True

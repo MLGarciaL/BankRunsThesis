@@ -1,16 +1,21 @@
 import numpy as np
 import random
 import networkx as nx
-from .agent import Agent
-from .bank import Bank
-from .network import Network
+try:
+    from agent import Agent
+    from bank import Bank
+    from network import Network
+except ImportError:
+    from .agent import Agent
+    from .bank import Bank
+    from .network import Network
 
 
 class Environment:
     def __init__(self, 
                  N, Lambda, 
                  threshold = None, varepsilon = 0,
-                 liquidity_ratio=0.2, liquidation_discount=0.9, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0, 
+                 liquidity_ratio=0.2, liquidation_discount=0.9, base_return = 1, return_multiplier=0.25, theta = 1, R=1.2, r = 1, equity=0, 
                  network_type="random", p=0.2, number_of_clusters=2, p_inside=0.7, p_outside=0.01, mean_degree = 4, edges = 1, 
                  seed=None):
 
@@ -27,7 +32,7 @@ class Environment:
         self.agents = [Agent(initial_cash=1.0, is_patient=(i not in impatient_indices), threshold=threshold, signal=theta + random.uniform(-varepsilon, varepsilon)) for i in range(N)]
 
         # Create bank
-        self.bank = Bank(liquidity_ratio, liquidation_discount, return_multiplier, theta, R, r, equity)
+        self.bank = Bank(liquidity_ratio, liquidation_discount, base_return, return_multiplier, theta, R, r, equity)
 
         # Create network
         self.network = Network(self, network_type, p, number_of_clusters, p_inside, p_outside, mean_degree, edges, seed)
@@ -58,7 +63,6 @@ class Environment:
     def simulation(self, random_order = True, printing = True):
         for agent in self.agents:
             agent.deposit(self.bank)
-            agent.signal = 1
 
         for agent in self.agents:
             agent.d_0 = sum(neighbor.deposited_money for neighbor in agent.neighbors) + agent.deposited_money
